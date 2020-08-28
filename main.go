@@ -151,46 +151,33 @@ func newEnvInvalidValueError(env string, err error) error {
 }
 
 func loadRawConfig() (cfg rawConfig, err error) {
+	var el envLoader
+
 	cfg = rawConfig{
-		slackToken:         os.Getenv(envSlackToken),
-		slackSigningSecret: os.Getenv(envSlackSigningSecret),
-		remindSchedule:     os.Getenv(envRemindSchedule),
-		noWaterRemindDelay: os.Getenv(envNoWaterRemindDelay),
-		noWaterSchedule:    os.Getenv(envNoWaterSchedule),
-		messagesPath:       os.Getenv(envMessagesPath),
-		channel:            os.Getenv(envChannel),
-		tz:                 os.Getenv(envTZ),
-		cbAddr:             os.Getenv(envCbAddr),
-	}
-	if cfg.slackToken == "" {
-		return cfg, newEnvNotSetError(envSlackToken)
-	}
-	if cfg.slackSigningSecret == "" {
-		return cfg, newEnvNotSetError(envSlackSigningSecret)
-	}
-	if cfg.remindSchedule == "" {
-		return cfg, newEnvNotSetError(envRemindSchedule)
-	}
-	if cfg.noWaterRemindDelay == "" {
-		return cfg, newEnvNotSetError(envNoWaterRemindDelay)
-	}
-	if cfg.noWaterSchedule == "" {
-		return cfg, newEnvNotSetError(envNoWaterSchedule)
-	}
-	if cfg.messagesPath == "" {
-		return cfg, newEnvNotSetError(envMessagesPath)
-	}
-	if cfg.channel == "" {
-		return cfg, newEnvNotSetError(envChannel)
-	}
-	if cfg.tz == "" {
-		return cfg, newEnvNotSetError(envTZ)
-	}
-	if cfg.cbAddr == "" {
-		return cfg, newEnvNotSetError(envCbAddr)
+		slackToken:         el.getRequiredEnv(envSlackToken),
+		slackSigningSecret: el.getRequiredEnv(envSlackSigningSecret),
+		remindSchedule:     el.getRequiredEnv(envRemindSchedule),
+		noWaterRemindDelay: el.getRequiredEnv(envNoWaterRemindDelay),
+		noWaterSchedule:    el.getRequiredEnv(envNoWaterSchedule),
+		messagesPath:       el.getRequiredEnv(envMessagesPath),
+		channel:            el.getRequiredEnv(envChannel),
+		tz:                 el.getRequiredEnv(envTZ),
+		cbAddr:             el.getRequiredEnv(envCbAddr),
 	}
 
-	return
+	return cfg, el.err
+}
+
+type envLoader struct {
+	err error
+}
+
+func (e *envLoader) getRequiredEnv(name string) string {
+	val := os.Getenv(name)
+	if val == "" {
+		e.err = multierror.Append(e.err, newEnvNotSetError(name))
+	}
+	return val
 }
 
 func loadConfig() (config, error) {
