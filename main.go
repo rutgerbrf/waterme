@@ -465,17 +465,16 @@ func (c *carer) handleEvents(ctx context.Context) error {
 
 type readCloser struct {
 	io.Reader
-	close func() error
-}
-
-func (c readCloser) Close() error {
-	return c.close()
+	io.Closer
 }
 
 func teeReadCloser(r io.ReadCloser, w io.Writer) io.ReadCloser {
 	tr := io.TeeReader(r, w)
 
-	return readCloser{Reader: tr, close: r.Close}
+	return readCloser{
+		Reader: tr,
+		Closer: r,
+	}
 }
 
 func (c *carer) handleSlackActionsCallback(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
