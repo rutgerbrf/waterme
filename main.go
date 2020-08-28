@@ -185,18 +185,20 @@ func loadConfig() (config, error) {
 	if err != nil {
 		return config{}, err
 	}
-	return rawCfg.process()
+	return rawCfg.convert()
 }
 
-func (c rawConfig) process() (config, error) {
-	return configConverter{}.process(c)
+func (c rawConfig) convert() (config, error) {
+	return configConverter{}.convert(c)
 }
 
 type configConverter struct {
 	err error
 }
 
-func (cc configConverter) process(c rawConfig) (config, error) {
+func (cc configConverter) convert(c rawConfig) (config, error) {
+	cc.reset()
+
 	return config{
 		slackToken:         c.slackToken,
 		slackSigningSecret: c.slackSigningSecret,
@@ -208,6 +210,10 @@ func (cc configConverter) process(c rawConfig) (config, error) {
 		cbAddr:             c.cbAddr,
 		messages:           cc.loadMessages(envMessagesPath, c.messagesPath),
 	}, cc.err
+}
+
+func (cc *configConverter) reset() {
+	cc.err = nil
 }
 
 func (cc *configConverter) timeParseDuration(isEnv, dur string) time.Duration {
@@ -256,26 +262,27 @@ type rawMessages struct {
 	WateredButton []string `json:"wateredButton"`
 }
 
-func (rm *rawMessages) convert() (messages, error) {
-	return (&messageConverter{}).convert(rm)
+func (rm rawMessages) convert() (messages, error) {
+	return messageConverter{}.convert(rm)
 }
 
 type messageConverter struct {
 	err error
 }
 
-func (mc *messageConverter) reset() {
-	mc.err = nil
-}
-
-func (mc *messageConverter) convert(rm *rawMessages) (messages, error) {
+func (mc messageConverter) convert(rm rawMessages) (messages, error) {
 	mc.reset()
+
 	return messages{
 		thanks:        mc.loadTemplates("thanks", rm.Thanks),
 		reminder:      mc.loadTemplates("reminder", rm.Reminder),
 		noWater:       mc.loadTemplates("noWater", rm.NoWater),
 		wateredButton: mc.loadTemplates("wateredButton", rm.WateredButton),
 	}, mc.err
+}
+
+func (mc *messageConverter) reset() {
+	mc.err = nil
 }
 
 func (mc *messageConverter) loadTemplates(listName string, s []string) []*template.Template {
