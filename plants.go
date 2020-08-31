@@ -21,6 +21,13 @@ type plantsSM struct {
 	state plantsState
 }
 
+func newPlantsSM(log logr.Logger) plantsSM {
+	return plantsSM{
+		stateMachine: newStateMachine(log),
+		state:        plantsStateHealthy,
+	}
+}
+
 func (p *plantsSM) State() plantsState {
 	statec := make(chan plantsState)
 	p.actionc <- func() {
@@ -37,7 +44,14 @@ func (p *plantsSM) Transition(new plantsState) {
 
 type stateMachine struct {
 	actionc chan func()
-	logger  logr.Logger
+	log     logr.Logger
+}
+
+func newStateMachine(log logr.Logger) stateMachine {
+	return stateMachine{
+		actionc: make(chan func()),
+		log:     log,
+	}
 }
 
 func (s *stateMachine) run(ctx context.Context) error {
@@ -49,7 +63,7 @@ func (s *stateMachine) run(ctx context.Context) error {
 			func() {
 				defer func() {
 					if r := recover(); r != nil {
-						s.logger.Error(errors.New("panicked"), "state machine panicked",
+						s.log.Error(errors.New("panicked"), "state machine panicked",
 							"stack", string(debug.Stack()),
 							"panicData", r,
 						)

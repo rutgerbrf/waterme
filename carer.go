@@ -30,7 +30,7 @@ func newCarer(cfg *config, slack *slack.Client, log logr.Logger) *carer {
 		log:    log,
 		slack:  slack,
 		router: httprouter.New(),
-		plants: plantsSM{},
+		plants: newPlantsSM(log),
 	}
 	carer.registerRoutes()
 
