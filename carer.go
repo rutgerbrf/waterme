@@ -162,7 +162,7 @@ func (c *carer) remind() {
 			slack.NewSectionBlock(
 				slack.NewTextBlockObject("mrkdwn",
 					msgs.reminder,
-					/* emoji */ false /* verbatim */, false,
+					/* emoji */ false, /* verbatim */ false,
 				),
 				nil, nil,
 			),
@@ -170,7 +170,7 @@ func (c *carer) remind() {
 				slack.NewButtonBlockElement(actionIDPlantsWatered, "",
 					slack.NewTextBlockObject(
 						"plain_text", msgs.wateredButton,
-						/* emoji */ true /* verbatim */, false,
+						/* emoji */ true, /* verbatim */ false,
 					),
 				).WithStyle(slack.StylePrimary),
 			),
@@ -210,7 +210,7 @@ func (c *carer) noWater() {
 			slack.NewSectionBlock(
 				slack.NewTextBlockObject("mrkdwn",
 					msgs.noWater,
-					/* emoji */ false /* verbatim */, false,
+					/* emoji */ false, /* verbatim */ false,
 				),
 				nil, nil,
 			),
@@ -218,7 +218,7 @@ func (c *carer) noWater() {
 				slack.NewButtonBlockElement(actionIDPlantsWatered, "",
 					slack.NewTextBlockObject(
 						"plain_text", msgs.wateredButton,
-						/* emoji */ true /* verbatim */, false,
+						/* emoji */ true, /* verbatim */ false,
 					),
 				).WithStyle(slack.StylePrimary),
 			),
@@ -246,7 +246,7 @@ func (c *carer) thank(user string) {
 		slack.MsgOptionBlocks(
 			slack.NewSectionBlock(
 				slack.NewTextBlockObject("mrkdwn",
-					msgs.thanks /* emoji */, false /* verbatim */, false,
+					msgs.thanks /* emoji */, false, /* verbatim */ false,
 				),
 				nil, nil,
 			),
